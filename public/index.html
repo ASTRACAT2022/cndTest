@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-black text-white">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CDN Speed Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-2xl space-y-6">
+      <h1 class="text-3xl font-bold text-center">CDN Speed Tester</h1>
+      <button onclick="runTest()" class="w-full py-3 bg-zinc-800 rounded-xl hover:bg-zinc-700">
+        🚀 Start Test
+      </button>
+      <div id="results" class="space-y-2"></div>
+    </div>
+    <script>
+      async function runTest() {
+        document.getElementById("results").innerHTML = "⏳ Testing...";
+        const res = await fetch("/api/test");
+        const data = await res.json();
+        localStorage.setItem("lastTest", JSON.stringify(data));
+
+        const html = data.map(d => d.success ? 
+          `<div class='p-4 rounded-xl bg-zinc-900'>
+            <div class='text-lg font-semibold'>${d.name}</div>
+            <div>Latency: ${d.latency} ms</div>
+            <div>Size: ${d.sizeKB} KB</div>
+          </div>` :
+          `<div class='p-4 rounded-xl bg-red-900'>
+            <div class='text-lg font-semibold'>${d.name}</div>
+            <div>Error: ${d.error}</div>
+          </div>`
+        ).join("");
+        document.getElementById("results").innerHTML = html;
+      }
+
+      window.onload = () => {
+        const last = localStorage.getItem("lastTest");
+        if (last) {
+          const data = JSON.parse(last);
+          document.getElementById("results").innerHTML = data.map(d => d.success ? 
+            `<div class='p-4 rounded-xl bg-zinc-900'>
+              <div class='text-lg font-semibold'>${d.name}</div>
+              <div>Latency: ${d.latency} ms</div>
+              <div>Size: ${d.sizeKB} KB</div>
+            </div>` :
+            `<div class='p-4 rounded-xl bg-red-900'>
+              <div class='text-lg font-semibold'>${d.name}</div>
+              <div>Error: ${d.error}</div>
+            </div>`).join("");
+        }
+      };
+    </script>
+  </body>
+</html>
